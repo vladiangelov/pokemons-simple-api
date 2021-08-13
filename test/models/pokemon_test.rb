@@ -1,7 +1,9 @@
 require "test_helper"
 
 class PokemonTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  test 'create a pokemon instance' do
+    pokemon = FactoryBot.create :pokemon, :with_details
+
+    assert_equal 'Bulbasaur', pokemon.name
+  end
 end

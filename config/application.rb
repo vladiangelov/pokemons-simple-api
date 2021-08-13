@@ -18,5 +18,10 @@ module PokemonApi
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # User factory bot instead of fixtures
+    config.generators do |g|
+      g.fixture_replacement :factory_bot
+    end
   end
 end
