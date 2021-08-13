@@ -43,3 +43,6 @@ config/environments/development.rb
 
 # Ignore private files
 private/*
+
+# Ignore simplecov output
+coverage
