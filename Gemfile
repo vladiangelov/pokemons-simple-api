@@ -57,7 +57,12 @@ group :test do
   gem 'selenium-webdriver'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
+  # Simple cov to output test coverage statistics in HTML format
   gem 'simplecov', require: false
+  # Webmock to mock HTTP requests
+  gem "webmock"
+  # Add mock expectations assertions to minitest
+  gem "minitest-mock_expectations"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

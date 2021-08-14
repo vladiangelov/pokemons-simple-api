@@ -4,3 +4,7 @@ AllCops:
   Exclude:
     - "db/schema.rb"
   NewCops: enable
+
+# Enfore compact style for namespacing / modules
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
