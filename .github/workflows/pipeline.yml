@@ -22,9 +22,5 @@ jobs:
         run: bundle install
       - name: Rubocop
         run: rubocop
-      - name: Create database
-        run: bundle exec rails db:create
-      - name: Prepare test database
-        run: bundle exec rails db:test:prepare
       - name: Run tests
         run: bundle exec rails test
