@@ -23,5 +23,7 @@ module PokemonApi
     config.generators do |g|
       g.fixture_replacement :factory_bot
     end
+
+    config.middleware.use Rack::Attack
   end
 end
