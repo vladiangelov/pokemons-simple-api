@@ -3,18 +3,23 @@
 #
 class PokeApiImportService::UpdatePokemons < ApplicationService
   def initialize(seconds_to_wait_between_requests)
+    super()
     @seconds_to_wait_between_requests = seconds_to_wait_between_requests
   end
 
   def call
     Pokemon.all.each do |pokemon|
-      url = "#{build_versioned_url}/pokemon/#{pokemon.name}"
-      parsed_response = fetch_api_response(url)
+      begin
+        url = "#{build_versioned_url}/pokemon/#{pokemon.name}"
+        parsed_response = fetch_api_response(url)
 
-      pokemon.update! pokemon_params(parsed_response)
+        pokemon.update! pokemon_params(parsed_response)
 
-      # TODO: create_pokemon_types(parsed_response)
-
+        types = parsed_response['types']
+        PokeApiImportService::CreatePokemonTypes.call(pokemon, types)
+      rescue ExternalApiCallError => e
+        Rails.logger.error e.message
+      end
       sleep(@seconds_to_wait_between_requests)
     end
   end
@@ -29,7 +34,8 @@ class PokeApiImportService::UpdatePokemons < ApplicationService
       height: parsed_response['height'],
       is_default: parsed_response['is_default'],
       order: parsed_response['order'],
-      weight: parsed_response['weight']
+      weight: parsed_response['weight'],
+      poke_api_id: parsed_response['id']
     }
   end
 
