@@ -15,7 +15,33 @@ class Api::V1::PokemonsController < ApplicationController
     render json: { total_count: Pokemon.count, next_page: has_next_page, pokemon: pokemon_list, success: true }, status: :ok
   end
 
+  def show
+    pokemon = pokemon_by_name_or_id
+
+    render json: { error: 'Could not find pokemon with that ID or name', success: false }, status: :bad_request and return if pokemon.nil?
+
+    pokemon_formatted = Api::V1::PokemonDecorator.decorate(pokemon).to_show_api_format
+
+    render json: { pokemon: pokemon_formatted, success: true }, status: :ok
+  end
+
   private
+
+  def pokemon_by_name_or_id
+    request_param = params[:id]
+    request_param_is_name = request_param.to_i.zero?
+
+    if request_param_is_name
+      Pokemon.find_by(name: request_param)
+    else
+      # rubocop:disable Lint/SuppressedException
+      begin
+        Pokemon.find(request_param)
+      rescue ActiveRecord::RecordNotFound
+      end
+      # rubocop:enable Lint/SuppressedException
+    end
+  end
 
   def check_for_incompatible_pagination_values
     render json: { error: 'Offset should be divisible by limit (limit is 20, if not supplied)', success: false }, status: :bad_request and return if @offset.positive? && (@offset % @limit).positive?

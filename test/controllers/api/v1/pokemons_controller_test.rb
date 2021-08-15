@@ -1,5 +1,6 @@
 require "test_helper"
 
+# rubocop:disable Metrics/ClassLength
 class Api::V1::PokemonsControllerTest < ActionDispatch::IntegrationTest
   def setup
     types.each { |type| FactoryBot.create :type, name: type }
@@ -11,6 +12,9 @@ class Api::V1::PokemonsControllerTest < ActionDispatch::IntegrationTest
         FactoryBot.create :pokemon_type, pokemon: pokemon_instance, type: type_instance
       end
     end
+
+    @bulbasaur = Pokemon.find_by(name: 'bulbasaur')
+    @bulbasaur.update!(bulbasaur_full_params)
   end
 
   test 'request to #index is sucessful with no params' do
@@ -111,7 +115,76 @@ class Api::V1::PokemonsControllerTest < ActionDispatch::IntegrationTest
     assert_equal expected_error, parsed_response['error']
   end
 
+  test 'request to #show is sucessful with a correct ID' do
+    get api_v1_pokemon_path(@bulbasaur.id)
+
+    assert_response :success
+  end
+
+  test 'request to #show is sucessful with a correct name' do
+    get api_v1_pokemon_path(@bulbasaur.name)
+
+    assert_response :success
+  end
+
+  test 'request to #show is unsuccessfull with an incorrect name' do
+    get api_v1_pokemon_path('Incorrect')
+
+    assert_response :bad_request
+  end
+
+  test 'request to #show is unsuccessfull with an incorrect ID' do
+    get api_v1_pokemon_path(@bulbasaur.id + 100)
+
+    assert_response :bad_request
+  end
+
+  test 'request to #show returns correct output' do
+    get api_v1_pokemon_path(@bulbasaur.name)
+
+    bulbasaur_respose = JSON.parse(response.body)
+
+    assert_equal expected_bulbasaur_response, bulbasaur_respose
+  end
+
   private
+
+  def bulbasaur_full_params
+    {
+      base_experience: 64,
+      height: 7,
+      poke_api_id: 1,
+      is_default: true,
+      order: 1,
+      weight: 69
+    }
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def expected_bulbasaur_response
+    {
+      "pokemon" => {
+        "id" => @bulbasaur.id,
+        "name" => "bulbasaur",
+        "types" => [
+          {
+            "name" => "normal"
+          },
+          {
+            "name" => "fighting"
+          }
+        ],
+        "poke_api_id" => 1,
+        "base_experience" => 64,
+        "height" => 7,
+        "is_default" => true,
+        "order" => 1,
+        "weight" => 69
+      },
+      "success" => true
+    }
+  end
+  # rubocop:enable Metrics/MethodLength
 
   def pokemons
     %w[bulbasaur ivysaur venusaur charmander charmeleon charizard squirtle wartortle blastoise caterpie metapod]
@@ -121,3 +194,4 @@ class Api::V1::PokemonsControllerTest < ActionDispatch::IntegrationTest
     %w[normal fighting]
   end
 end
+# rubocop:enable Metrics/ClassLength
