@@ -7,7 +7,7 @@ class Api::V1::PokemonsController < ApplicationController
 
   def index
     pokemon_list = Pokemon.paginated_with_types(@page, @limit).map do |pokemon|
-      decorate_pokemon(pokemon)
+      Api::V1::PokemonDecorator.decorate(pokemon).to_index_api_format
     end
 
     has_next_page = Pokemon.page(@page).per(@limit).next_page.present?
@@ -16,20 +16,6 @@ class Api::V1::PokemonsController < ApplicationController
   end
 
   private
-
-  def decorate_pokemon(pokemon)
-    {
-      id: pokemon.id,
-      name: pokemon.name,
-      types: create_array_of_types(pokemon)
-    }
-  end
-
-  def create_array_of_types(pokemon)
-    pokemon.pokemon_types.map do |pokemon_type|
-      { name: pokemon_type.type.name }
-    end
-  end
 
   def check_for_incompatible_pagination_values
     render json: { error: 'Offset should be divisible by limit (limit is 20, if not supplied)', success: false }, status: :bad_request and return if @offset.positive? && (@offset % @limit).positive?
